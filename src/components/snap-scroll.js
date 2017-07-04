@@ -15,8 +15,12 @@ export default class SnapScroll extends Component {
     this.childNodeList = [];
     this.selected = 1;
     this.scrolling = false;
-    this.position = 0;
+    this.position = 1;
     this.scrollTimer = -1;
+  }
+
+  componentDidMount() {
+    // this.childNodeList;
   }
 
   renderChildNodes() {
@@ -29,7 +33,10 @@ export default class SnapScroll extends Component {
         key={index}
         ref={(input) => { this.childNodeList[index] = input; }}
         >
-        <div className="label">
+        <div
+          className="label"
+          style={index === this.position ? {color: 'red'} : null}
+          >
           <h1>{index}</h1>
         </div>
       </div>
@@ -66,6 +73,8 @@ export default class SnapScroll extends Component {
         this.position += 1;
       }
     }
+
+
   }
 
   scrollToBoundary(container, userScroll, boundary, direction) {
@@ -100,8 +109,6 @@ export default class SnapScroll extends Component {
     }
   }
 
-
-
   handleOnScroll(e) {
     const userScroll = e.target.scrollLeft;
     const container = e.target;
@@ -133,7 +140,7 @@ export default class SnapScroll extends Component {
         if (!this.scrolling) {
         this.scrollTimer = window.setTimeout(() => {
           this.snapToScroll(userScroll, childBoundaries, container);
-        }, 1000);
+        }, 250);
       }
   }
 
@@ -156,5 +163,5 @@ export default class SnapScroll extends Component {
 SnapScroll.propTypes = {
    options: PropTypes.object.isRequired,
    className: PropTypes.string,
-   id: PropTypes.string,
+   id: PropTypes.string
 }
