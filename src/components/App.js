@@ -8,7 +8,11 @@ export default class App extends Component {
   render() {
     return (
       <div>
-        <SnapScroll options={{children:8}}/>
+        <SnapScroll
+          options={{children:8}}
+          className="container"
+          id="snap-scroll-container-coordinates-centered"
+          />
       </div>
     );
   }

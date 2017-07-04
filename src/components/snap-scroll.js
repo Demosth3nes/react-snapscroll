@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
+import { getFactors } from '../utils/functions';
 export default class SnapScroll extends Component {
   constructor(props) {
     super(props);
@@ -8,8 +8,10 @@ export default class SnapScroll extends Component {
     this.state = {
       userScroll : 0
     }
+
     this.handleOnScroll = this.handleOnScroll.bind(this);
     this.snapToScroll = this.snapToScroll.bind(this);
+
     this.childNodeList = [];
     this.selected = 1;
     this.scrolling = false;
@@ -37,21 +39,18 @@ export default class SnapScroll extends Component {
   }
 
   snapToScroll(userScroll, childBoundaries, container){
-    console.log("here");
+
     let closestElement;
 
-    childBoundaries.map((item, index) => {
+    childBoundaries.some((item, index) => {
       const endBoundary = item.endBoundary;
       const startBoundary = item.startBoundary;
-
       if (userScroll > startBoundary && userScroll < endBoundary) {
-
         this.position = index;
         closestElement = item;
+        return true;
       }
     });
-
-    console.log(userScroll, closestElement);
 
     if (closestElement === undefined || closestElement.startBoundary === userScroll) {
       return false;
@@ -59,6 +58,7 @@ export default class SnapScroll extends Component {
       if (container.scrollLeft !== closestElement.endBoundary) {
         this.scrollToBoundary(container, userScroll, closestElement.endBoundary, 'right');
         this.position += 2;
+
       }
     } else if (userScroll < closestElement.middleBoundary) {
       if (container.scrollLeft !== closestElement.startBoundary) {
@@ -66,25 +66,6 @@ export default class SnapScroll extends Component {
         this.position += 1;
       }
     }
-
-
-
-    //
-    // console.log(closestElement);
-    // if (closestElement === undefined || closestElement.startBoundary === userScroll) {
-    //   return false;
-    // } else if (userScroll >= closestElement.middleBoundary) {
-    //   if (container.scrollLeft !== closestElement.endBoundary) {
-    //
-    //     this.scrollToBoundary(container, userScroll, closestElement.endBoundary, 'right');
-    //     this.position += 2;
-    //   }
-    // } else if (userScroll < closestElement.middleBoundary) {
-    //   // if (container.scrollLeft !== closestElement.startBoundary) {
-    //   //   this.scrollToBoundary(container, userScroll, closestElement.startBoundary, 'left');
-    //   //   position += 1;
-    //   // }
-    // }
   }
 
   scrollToBoundary(container, userScroll, boundary, direction) {
@@ -92,10 +73,10 @@ export default class SnapScroll extends Component {
     this.scrolling = true;
     if (direction === 'right') {
       // const distance = boundary - scroll;
-      // const speeds = this.getFactors(distance);
+      // const speeds = getFactors(distance);
       //
       // const speed = distance < 120 ? 1 : speeds[0];
-
+      //
       // let currentSpeed = speeds[1] && speeds[1] > 20 ? 1 : speeds[1];
       const setInterval = window.setInterval(() => {
         if (scroll !== boundary) {
@@ -119,24 +100,7 @@ export default class SnapScroll extends Component {
     }
   }
 
-  getFactors(n) {
-    const numFactors = [];
-    let i;
 
-    for (i = 1; i <= Math.floor(Math.sqrt(n)); i += 1) {
-      if (n % i === 0) {
-        numFactors.push(i);
-        if (n / i !== i) {
-          numFactors.push(n / i);
-        }
-      }
-    }
-    numFactors.sort((x, y) => {
-      return x - y;
-    }); // numeric sort
-
-    return numFactors;
-  }
 
   handleOnScroll(e) {
     const userScroll = e.target.scrollLeft;
@@ -178,11 +142,11 @@ export default class SnapScroll extends Component {
     return (
       <div>
         <div
-          className="container"
-          id="snap-scroll-container-coordinates-centered"
+          className={this.props.className}
+          id={this.props.id}
           onScroll={this.handleOnScroll}
           >
-              {this.renderChildNodes()}
+          {this.renderChildNodes()}
         </div>
       </div>
     )
@@ -190,5 +154,7 @@ export default class SnapScroll extends Component {
 }
 
 SnapScroll.propTypes = {
-   options: PropTypes.object.isRequired
+   options: PropTypes.object.isRequired,
+   className: PropTypes.string,
+   id: PropTypes.string,
 }
