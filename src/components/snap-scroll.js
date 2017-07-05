@@ -57,40 +57,53 @@ export default class SnapScroll extends Component {
         closestElement = item;
         return true;
       }
+
+      return false;
     });
 
     if (closestElement === undefined || closestElement.startBoundary === userScroll) {
       return false;
     } else if (userScroll >= closestElement.middleBoundary) {
       if (container.scrollLeft !== closestElement.endBoundary) {
-        this.scrollToBoundary(container, userScroll, closestElement.endBoundary, 'right');
+        this.scrollToBoundary(container, closestElement.endBoundary, 'right');
         this.position += 2;
 
       }
-    } else if (userScroll < closestElement.middleBoundary) {
+    } else if (userScroll <= closestElement.middleBoundary) {
       if (container.scrollLeft !== closestElement.startBoundary) {
-        this.scrollToBoundary(container, userScroll, closestElement.startBoundary, 'left');
+        this.scrollToBoundary(container, closestElement.startBoundary, 'left');
         this.position += 1;
       }
     }
-
-
   }
 
-  scrollToBoundary(container, userScroll, boundary, direction) {
-    let scroll = userScroll;
+  scrollToBoundary(container, boundary, direction) {
     this.scrolling = true;
+
     if (direction === 'right') {
-      // const distance = boundary - scroll;
-      // const speeds = getFactors(distance);
-      //
-      // const speed = distance < 120 ? 1 : speeds[0];
-      //
-      // let currentSpeed = speeds[1] && speeds[1] > 20 ? 1 : speeds[1];
+
       const setInterval = window.setInterval(() => {
-        if (scroll !== boundary) {
-          scroll += 1;
-          container.scrollLeft += 1;
+        if (this.state.userScroll !== boundary) {
+          let distance = boundary - this.state.userScroll;
+          let speed;
+          switch (distance) {
+            case distance > 60:
+              speed = 50
+              break;
+            case distance > 40:
+            speed = 30;
+              break;
+            case distance < 40:
+            speed = 1;
+              break;
+            default:
+            speed = 1;
+              break;
+          }
+
+          container.scrollLeft = boundary;
+
+          this.setState({userScroll : boundary});
         } else {
           this.scrolling = false;
           clearInterval(setInterval);
@@ -98,9 +111,11 @@ export default class SnapScroll extends Component {
       }, 1);
     } else {
       const setInterval = window.setInterval(() => {
-        if (scroll !== boundary) {
-          scroll -= 1;
-          container.scrollLeft -= 1;
+        if (this.state.userScroll !== boundary) {
+
+          container.scrollLeft = boundary;
+
+          this.setState({userScroll : boundary});
         } else {
           this.scrolling = false;
           clearInterval(setInterval);
@@ -110,7 +125,17 @@ export default class SnapScroll extends Component {
   }
 
   handleOnScroll(e) {
+    // if(this.scrolling) {
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    //     clearTimeout(this.scrollTimer);
+    //   return false;
+    //
+    // }
+
+
     const userScroll = e.target.scrollLeft;
+    // console.log(userScroll);
     const container = e.target;
     let currentWidth = 0;
 
@@ -125,13 +150,27 @@ export default class SnapScroll extends Component {
       };
     });
 
+    childBoundaries.some((item, index) => {
+      const endBoundary = item.endBoundary;
+      const startBoundary = item.startBoundary;
+      if (userScroll > startBoundary && userScroll < endBoundary) {
+        this.setState((prevState, props) => {
+          if(userScroll > prevState.userScroll) {
+            this.position = index+2;
+            return {userScroll, scrollDirection : 'right'}
+          } else {
+            this.position = index+1;
+            return {userScroll, scrollDirection : 'left'}
+          }
+        });
+        console.log(userScroll);
 
-    this.setState((previousState, _) => {
-      if(userScroll !== previousState.userScroll) {
-
+        return true;
       }
-      return {userScroll};
+
+      return false;
     });
+
 
 
       if(this.scrollTimer !== -1) {
@@ -140,7 +179,7 @@ export default class SnapScroll extends Component {
         if (!this.scrolling) {
         this.scrollTimer = window.setTimeout(() => {
           this.snapToScroll(userScroll, childBoundaries, container);
-        }, 250);
+        }, 200);
       }
   }
 
