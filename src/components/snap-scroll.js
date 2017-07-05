@@ -6,17 +6,20 @@ export default class SnapScroll extends Component {
     super(props);
 
     this.state = {
-      userScroll : 0
+      userScroll : 0,
+      position: 1,
+      scrollTimer: -1
     }
 
     this.handleOnScroll = this.handleOnScroll.bind(this);
     this.snapToScroll = this.snapToScroll.bind(this);
-
+    this.handleOnTouchStart = this.handleOnTouchStart.bind(this);
+    // this.handleOnTouchEnd = this.handleOnTouchEnd.bind(this);
     this.childNodeList = [];
     this.selected = 1;
-    this.scrolling = false;
     this.position = 1;
     this.scrollTimer = -1;
+    this.container = '';
   }
 
   componentDidMount() {
@@ -35,7 +38,7 @@ export default class SnapScroll extends Component {
         >
         <div
           className="label"
-          style={index === this.position ? {color: 'red'} : null}
+          style={index === this.state.position ? {color: 'red'} : null}
           >
           <h1>{index}</h1>
         </div>
@@ -45,61 +48,61 @@ export default class SnapScroll extends Component {
 
   }
 
-  snapToScroll(userScroll, childBoundaries, container){
+  handleOnTouchStart(e) {
+    this.setState({scrolling : true});
+  }
 
-    let closestElement;
+  // handleOnTouchEnd(){
+  //     console.log("here1");
+  //     window.setTimeout(() => {
+  //       console.log("here");
+  //         if(!this.state.scrolling) {
+  //
+  //         }
+  //       }, 1000);
+  //     }
 
-    childBoundaries.some((item, index) => {
-      const endBoundary = item.endBoundary;
-      const startBoundary = item.startBoundary;
-      if (userScroll > startBoundary && userScroll < endBoundary) {
-        this.position = index;
-        closestElement = item;
-        return true;
-      }
+  snapToScroll(){
 
-      return false;
-    });
+    const { userScroll, closestElement, container } = this.state;
+    const { startBoundary, endBoundary, middleBoundary, index } = closestElement;
 
-    if (closestElement === undefined || closestElement.startBoundary === userScroll) {
-      return false;
-    } else if (userScroll >= closestElement.middleBoundary) {
-      if (container.scrollLeft !== closestElement.endBoundary) {
-        this.scrollToBoundary(container, closestElement.endBoundary, 'right');
-        this.position += 2;
+    if(userScroll === startBoundary){
 
-      }
-    } else if (userScroll <= closestElement.middleBoundary) {
-      if (container.scrollLeft !== closestElement.startBoundary) {
-        this.scrollToBoundary(container, closestElement.startBoundary, 'left');
-        this.position += 1;
-      }
+    } else if(userScroll >=  middleBoundary) {
+      container.scrollLeft = endBoundary;
+      this.setState({position: index + 2, scrolling:false});
+    } else if(userScroll < middleBoundary) {
+      container.scrollLeft = startBoundary;
+      this.setState({position: index + 1, scrolling: false});
     }
+    console.log(userScroll, middleBoundary);
+
   }
 
   scrollToBoundary(container, boundary, direction) {
-    this.scrolling = true;
 
+    this.setState({scrolling: true});
     if (direction === 'right') {
 
       const setInterval = window.setInterval(() => {
         if (this.state.userScroll !== boundary) {
-          let distance = boundary - this.state.userScroll;
-          let speed;
-          switch (distance) {
-            case distance > 60:
-              speed = 50
-              break;
-            case distance > 40:
-            speed = 30;
-              break;
-            case distance < 40:
-            speed = 1;
-              break;
-            default:
-            speed = 1;
-              break;
-          }
+          // let distance = boundary - this.state.userScroll;
+          // let speed;
+          // switch (distance) {
+          //   case distance > 60:
+          //     speed = 50
+          //     break;
+          //   case distance > 40:
+          //   speed = 30;
+          //     break;
+          //   case distance < 40:
+          //   speed = 1;
+          //     break;
+          //   default:
+          //   speed = 1;
+          //     break;
+          // }
 
           container.scrollLeft = boundary;
 
@@ -114,7 +117,6 @@ export default class SnapScroll extends Component {
         if (this.state.userScroll !== boundary) {
 
           container.scrollLeft = boundary;
-
           this.setState({userScroll : boundary});
         } else {
           this.scrolling = false;
@@ -125,18 +127,10 @@ export default class SnapScroll extends Component {
   }
 
   handleOnScroll(e) {
-    // if(this.scrolling) {
-    //   e.preventDefault();
-    //   e.stopPropagation();
-    //     clearTimeout(this.scrollTimer);
-    //   return false;
-    //
-    // }
-
 
     const userScroll = e.target.scrollLeft;
-    // console.log(userScroll);
     const container = e.target;
+
     let currentWidth = 0;
 
     const childBoundaries = this.childNodeList.map((item, index) => {
@@ -147,23 +141,39 @@ export default class SnapScroll extends Component {
         'startBoundary': currentWidth - item.offsetWidth,
         'middleBoundary': index === 0 ? item.offsetWidth / 2 : (currentWidth) - (item.offsetWidth / 2),
         'endBoundary': currentWidth,
+         index
       };
     });
 
     childBoundaries.some((item, index) => {
+
       const endBoundary = item.endBoundary;
       const startBoundary = item.startBoundary;
+
       if (userScroll > startBoundary && userScroll < endBoundary) {
         this.setState((prevState, props) => {
           if(userScroll > prevState.userScroll) {
-            this.position = index+2;
-            return {userScroll, scrollDirection : 'right'}
+            return {
+              userScroll,
+              scrollDirection: 'right',
+              childBoundaries,
+              container,
+              scrolling: true,
+              closestElement : item,
+              position: index + 2
+            }
           } else {
-            this.position = index+1;
-            return {userScroll, scrollDirection : 'left'}
+            this.position = index;
+            return {
+              userScroll,
+              scrollDirection : 'left',
+              childBoundaries,
+              container,
+              scrolling: true,
+              closestElement : item,
+              position: index + 1}
           }
         });
-        console.log(userScroll);
 
         return true;
       }
@@ -172,15 +182,15 @@ export default class SnapScroll extends Component {
     });
 
 
-
-      if(this.scrollTimer !== -1) {
+      if (this.scrollTimer !== -1) {
         clearTimeout(this.scrollTimer);
       }
-        if (!this.scrolling) {
-        this.scrollTimer = window.setTimeout(() => {
-          this.snapToScroll(userScroll, childBoundaries, container);
-        }, 200);
-      }
+
+      this.scrollTimer = window.setTimeout(() => {
+        console.log("here");
+        this.snapToScroll();
+      }, 100);
+
   }
 
 
@@ -191,6 +201,8 @@ export default class SnapScroll extends Component {
           className={this.props.className}
           id={this.props.id}
           onScroll={this.handleOnScroll}
+          onTouchStart={this.handleOnTouchStart}
+          onTouchEnd={this.handleOnTouchEnd}
           >
           {this.renderChildNodes()}
         </div>
