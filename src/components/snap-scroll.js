@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { getFactors } from '../utils/functions';
+
 export default class SnapScroll extends Component {
   constructor(props) {
     super(props);
@@ -19,10 +20,6 @@ export default class SnapScroll extends Component {
     this.childNodeList = [];
     this.scrollTimer = -1;
     this.throttleTimer = 0;
-  }
-
-  componentDidMount() {
-    // this.childNodeList;
   }
 
   renderChildNodes() {
@@ -51,16 +48,6 @@ export default class SnapScroll extends Component {
     this.setState({scrolling : true});
   }
 
-  // handleOnTouchEnd(){
-  //     console.log("here1");
-  //     window.setTimeout(() => {
-  //       console.log("here");
-  //         if(!this.state.scrolling) {
-  //
-  //         }
-  //       }, 1000);
-  //     }
-
   snapToScroll(){
 
     const { userScroll, closestElement, container } = this.state;
@@ -77,52 +64,6 @@ export default class SnapScroll extends Component {
     }
 
 
-  }
-
-  scrollToBoundary(container, boundary, direction) {
-
-    this.setState({scrolling: true});
-    if (direction === 'right') {
-
-      const setInterval = window.setInterval(() => {
-        if (this.state.userScroll !== boundary) {
-          // let distance = boundary - this.state.userScroll;
-          // let speed;
-          // switch (distance) {
-          //   case distance > 60:
-          //     speed = 50
-          //     break;
-          //   case distance > 40:
-          //   speed = 30;
-          //     break;
-          //   case distance < 40:
-          //   speed = 1;
-          //     break;
-          //   default:
-          //   speed = 1;
-          //     break;
-          // }
-
-          container.scrollLeft = boundary;
-
-          this.setState({userScroll : boundary});
-        } else {
-          this.scrolling = false;
-          clearInterval(setInterval);
-        }
-      }, 1);
-    } else {
-      const setInterval = window.setInterval(() => {
-        if (this.state.userScroll !== boundary) {
-
-          container.scrollLeft = boundary;
-          this.setState({userScroll : boundary});
-        } else {
-          this.scrolling = false;
-          clearInterval(setInterval);
-        }
-      }, 1);
-    }
   }
 
   handleOnScroll(e) {
@@ -182,7 +123,6 @@ export default class SnapScroll extends Component {
 
 
       if (this.scrollTimer !== -1) {
-          console.log(this.state.userScroll, this.state.container.scrollLeft);
         clearTimeout(this.scrollTimer);
 
       }
