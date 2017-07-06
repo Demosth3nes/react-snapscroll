@@ -4,6 +4,7 @@ A colleague asked me if creating a horizontal scrollbar which snaps to the neare
 
 ```
 git clone https://github.com/Demosth3nes/react-snapscroll.git
+cd react-snapscroll
 npm install
 npm start
 ```
