@@ -7,3 +7,8 @@ git clone https://github.com/Demosth3nes/react-snapscroll.git
 npm install
 npm start
 ```
+
+Ive included the other versions too
+
+ES5 - scroll-snap.js
+ES6 - snapscroll-es6.js
