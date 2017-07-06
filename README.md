@@ -10,5 +10,8 @@ npm start
 
 Ive included the other versions too
 
+```
 ES5 - scroll-snap.js
 ES6 - snapscroll-es6.js
+```
+
